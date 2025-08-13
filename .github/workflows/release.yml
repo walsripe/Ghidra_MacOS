@@ -1,0 +1,32 @@
+name: Build MacOS APP for Ghidra
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build for ${{ matrix.arch }}
+        run: ./build.bash -a ${{ matrix.arch }} -f
+
+      - name: Package into DMG
+        run: |
+          mkdir -p dist
+          hdiutil create dist/Ghidra-${{ matrix.arch }}.dmg \
+            -volname "Ghidra" \
+            -srcfolder Ghidra.app \
+            -ov \
+            -format UDZO
+
+      - name: Upload DMG to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Ghidra-${{ matrix.arch }}.dmg
