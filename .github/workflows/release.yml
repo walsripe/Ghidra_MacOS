@@ -11,10 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Get the release tag
-      - name: Set release tag
-        run: echo "RELEASE_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
-
       # Build x86_64 version
       - name: Build x86_64
         run: ./build.bash -a x86_64 -f -o Ghidra-x86_64.app
@@ -27,19 +23,17 @@ jobs:
       - name: Package DMGs
         run: |
           mkdir -p dist
+          TAG=${GITHUB_REF##*/}
 
           # Create x86_64 DMG
-          hdiutil create dist/Ghidra-${RELEASE_TAG}-x86_64.dmg \
+          hdiutil create "dist/Ghidra-${TAG}-x86_64.dmg" \
             -volname "Ghidra" \
             -srcfolder Ghidra-x86_64.app \
             -ov \
             -format UDZO
 
-          # Ensure previous volume is unmounted (if any)
-          hdiutil detach /Volumes/Ghidra || true
-
           # Create arm64 DMG
-          hdiutil create dist/Ghidra-${RELEASE_TAG}-arm64.dmg \
+          hdiutil create "dist/Ghidra-${TAG}-arm64.dmg" \
             -volname "Ghidra" \
             -srcfolder Ghidra-arm64.app \
             -ov \
@@ -50,6 +44,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/Ghidra-${RELEASE_TAG}-x86_64.dmg
-            dist/Ghidra-${RELEASE_TAG}-arm64.dmg
-          token: ${{ secrets.GH_PAT }}
+            dist/Ghidra-${{ github.ref_name }}-x86_64.dmg
+            dist/Ghidra-${{ github.ref_name }}-arm64.dmg
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
