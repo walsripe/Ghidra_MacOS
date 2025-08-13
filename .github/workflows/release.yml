@@ -36,4 +36,4 @@ jobs:
           files: |
             dist/Ghidra-x86_64.dmg
             dist/Ghidra-arm64.dmg
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
