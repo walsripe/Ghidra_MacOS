@@ -1,4 +1,4 @@
-# Ghidra_app
+# Ghidra_MacOS
 
 Build a working Ghidra application for macOS with a bundled Java JDK.
 
