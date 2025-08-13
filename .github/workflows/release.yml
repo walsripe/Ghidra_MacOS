@@ -30,5 +30,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/Ghidra-${{ matrix.arch }}.dmg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GH_PAT }}
