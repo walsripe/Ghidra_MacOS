@@ -46,5 +46,4 @@ jobs:
           files: |
             dist/Ghidra-${{ github.ref_name }}-x86_64.dmg
             dist/Ghidra-${{ github.ref_name }}-arm64.dmg
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GH_PAT }}
