@@ -7,6 +7,7 @@ on:
 jobs:
   build-and-upload:
     runs-on: macos-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -14,26 +15,37 @@ jobs:
       - name: Set release tag
         run: echo "RELEASE_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
+      # Build x86_64 version
       - name: Build x86_64
-        run: ./build.bash -a x86_64 -f
+        run: ./build.bash -a x86_64 -f -o Ghidra-x86_64.app
 
+      # Build arm64 version
       - name: Build arm64
-        run: ./build.bash -a arm64 -f
+        run: ./build.bash -a arm64 -f -o Ghidra-arm64.app
 
+      # Package DMGs
       - name: Package DMGs
         run: |
           mkdir -p dist
+
+          # Create x86_64 DMG
           hdiutil create dist/Ghidra-${RELEASE_TAG}-x86_64.dmg \
             -volname "Ghidra" \
-            -srcfolder Ghidra.app \
-            -ov \
-            -format UDZO
-          hdiutil create dist/Ghidra-${RELEASE_TAG}-arm64.dmg \
-            -volname "Ghidra" \
-            -srcfolder Ghidra.app \
+            -srcfolder Ghidra-x86_64.app \
             -ov \
             -format UDZO
 
+          # Ensure previous volume is unmounted (if any)
+          hdiutil detach /Volumes/Ghidra || true
+
+          # Create arm64 DMG
+          hdiutil create dist/Ghidra-${RELEASE_TAG}-arm64.dmg \
+            -volname "Ghidra" \
+            -srcfolder Ghidra-arm64.app \
+            -ov \
+            -format UDZO
+
+      # Upload DMGs to Release
       - name: Upload DMGs to Release
         uses: softprops/action-gh-release@v2
         with:
