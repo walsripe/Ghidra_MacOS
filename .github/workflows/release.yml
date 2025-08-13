@@ -5,29 +5,35 @@ on:
     types: [published]
 
 jobs:
-  build:
+  build-and-upload:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        arch: [x86_64, arm64]
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build for ${{ matrix.arch }}
-        run: ./build.bash -a ${{ matrix.arch }} -f
+      - name: Build x86_64
+        run: ./build.bash -a x86_64 -f
 
-      - name: Package into DMG
+      - name: Build arm64
+        run: ./build.bash -a arm64 -f
+
+      - name: Package DMGs
         run: |
           mkdir -p dist
-          hdiutil create dist/Ghidra-${{ matrix.arch }}.dmg \
+          hdiutil create dist/Ghidra-x86_64.dmg \
+            -volname "Ghidra" \
+            -srcfolder Ghidra.app \
+            -ov \
+            -format UDZO
+          hdiutil create dist/Ghidra-arm64.dmg \
             -volname "Ghidra" \
             -srcfolder Ghidra.app \
             -ov \
             -format UDZO
 
-      - name: Upload DMG to release
+      - name: Upload DMGs to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/Ghidra-${{ matrix.arch }}.dmg
+          files: |
+            dist/Ghidra-x86_64.dmg
+            dist/Ghidra-arm64.dmg
           token: ${{ secrets.GH_PAT }}
